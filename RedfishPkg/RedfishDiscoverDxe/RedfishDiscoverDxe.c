@@ -1596,10 +1596,13 @@ BuildupNetworkInterface (
   EFI_REDFISH_DISCOVER_REST_EX_INSTANCE_INTERNAL   *RestExInstance;
   EFI_TPL                                          OldTpl;
   BOOLEAN                                          NewNetworkInterfaceInstalled;
+  UINTN                                            ListCount;
+
+  ListCount = (sizeof (gRequiredProtocol) / sizeof (REDFISH_DISCOVER_REQUIRED_PROTOCOL));
 
   NewNetworkInterfaceInstalled = FALSE;
-  Index                        = 0;
-  do {
+
+  for (Index = 0; Index < ListCount; Index++) {
     Status = gBS->OpenProtocol (
                     // Already in list?
                     ControllerHandle,
@@ -1610,11 +1613,6 @@ BuildupNetworkInterface (
                     EFI_OPEN_PROTOCOL_GET_PROTOCOL
                     );
     if (!EFI_ERROR (Status)) {
-      Index++;
-      if (Index == (sizeof (gRequiredProtocol) / sizeof (REDFISH_DISCOVER_REQUIRED_PROTOCOL))) {
-        break;
-      }
-
       continue;
     }
 
@@ -1627,11 +1625,6 @@ BuildupNetworkInterface (
                     EFI_OPEN_PROTOCOL_GET_PROTOCOL
                     );
     if (EFI_ERROR (Status)) {
-      Index++;
-      if (Index == (sizeof (gRequiredProtocol) / sizeof (REDFISH_DISCOVER_REQUIRED_PROTOCOL))) {
-        break;
-      }
-
       continue;
     }
 
@@ -1690,11 +1683,6 @@ BuildupNetworkInterface (
                     ProtocolDiscoverIdPtr
                     );
     if (EFI_ERROR (Status)) {
-      Index++;
-      if (Index == (sizeof (gRequiredProtocol) / sizeof (REDFISH_DISCOVER_REQUIRED_PROTOCOL))) {
-        break;
-      }
-
       continue;
     }
 
@@ -1750,26 +1738,13 @@ BuildupNetworkInterface (
             DEBUG ((DEBUG_ERROR, "%a: Fail to install EFI_REDFISH_DISCOVER_PROTOCOL\n", __func__));
           }
         } else {
-          DEBUG ((DEBUG_MANAGEABILITY, "%a: Not REST EX, continue with next\n", __func__));
-          Index++;
-          if (Index == (sizeof (gRequiredProtocol) / sizeof (REDFISH_DISCOVER_REQUIRED_PROTOCOL))) {
-            break;
-          }
-
-          continue;
+         continue;
         }
       }
 
       return Status;
-    } else {
-      Index++;
-      if (Index == (sizeof (gRequiredProtocol) / sizeof (REDFISH_DISCOVER_REQUIRED_PROTOCOL))) {
-        break;
-      }
-
-      continue;
     }
-  } while (Index < (sizeof (gRequiredProtocol) / sizeof (REDFISH_DISCOVER_REQUIRED_PROTOCOL)));
+  }
 
   return EFI_DEVICE_ERROR;
 }
