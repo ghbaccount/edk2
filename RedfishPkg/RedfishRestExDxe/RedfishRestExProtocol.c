@@ -240,9 +240,15 @@ ReSendRequest:;
   // Restore the headers if it ever changed in RedfishHttpAddExpectation().
   //
   if (FixedPcdGetBool (PcdRedfishRestExAddingExpect) && (RequestMessage->Headers != PreservedRequestHeaders)) {
-    FreePool (RequestMessage->Headers);
-    RequestMessage->Headers = PreservedRequestHeaders; // Restore headers before we adding "Expect".
-    RequestMessage->HeaderCount--;                     // Minus one header count for "Expect".
+    if ((RequestMessage->Data.Request->Method != HttpMethodPut) && (RequestMessage->Data.Request->Method != HttpMethodPost) &&
+        (RequestMessage->Data.Request->Method != HttpMethodPatch)) {
+          ;
+        } else {
+
+        FreePool (RequestMessage->Headers);
+        RequestMessage->Headers = PreservedRequestHeaders; // Restore headers before we adding "Expect".
+        RequestMessage->HeaderCount--;                     // Minus one header count for "Expect".
+    }
   }
 
   DEBUG ((DEBUG_REDFISH_NETWORK, "HTTP Response StatusCode - %d:", ResponseData->Response.StatusCode));
