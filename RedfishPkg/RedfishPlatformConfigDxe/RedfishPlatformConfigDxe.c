@@ -1699,6 +1699,7 @@ RedfishPlatformConfigSetStatementCommon (
         Status = HiiStringToOrderedListOptionValue (TargetStatement, Schema, TempBuffer, &Value);
         if (EFI_ERROR (Status)) {
           ASSERT (FALSE);
+          FreePool (TempBuffer);
           continue;
         }
 
