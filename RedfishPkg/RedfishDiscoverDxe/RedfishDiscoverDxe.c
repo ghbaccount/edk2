@@ -318,6 +318,10 @@ GetTargetNetworkInterfaceInternal (
 {
   EFI_REDFISH_DISCOVER_NETWORK_INTERFACE_INTERNAL  *ThisNetworkInterface;
 
+  if (IsListEmpty (&mEfiRedfishDiscoverNetworkInterface)) {
+    return NULL;
+  }
+
   ThisNetworkInterface = (EFI_REDFISH_DISCOVER_NETWORK_INTERFACE_INTERNAL *)GetFirstNode (&mEfiRedfishDiscoverNetworkInterface);
   while (TRUE) {
     if (CompareMem ((VOID *)&ThisNetworkInterface->MacAddress, &TargetNetworkInterface->MacAddress, ThisNetworkInterface->HwAddressSize) == 0) {
@@ -349,6 +353,11 @@ GetTargetNetworkInterfaceInternalByController (
   )
 {
   EFI_REDFISH_DISCOVER_NETWORK_INTERFACE_INTERNAL  *ThisNetworkInterface;
+
+  if (IsListEmpty (&mEfiRedfishDiscoverNetworkInterface)) {
+    ASSERT (FALSE);
+    return NULL;
+  }
 
   ThisNetworkInterface = (EFI_REDFISH_DISCOVER_NETWORK_INTERFACE_INTERNAL *)GetFirstNode (&mEfiRedfishDiscoverNetworkInterface);
   while (TRUE) {
@@ -1226,7 +1235,13 @@ RedfishServiceAcquireService (
 
   if (TargetNetworkInterface != NULL) {
     TargetNetworkInterfaceInternal = GetTargetNetworkInterfaceInternal (TargetNetworkInterface);
-    NumNetworkInterfaces           = 1;
+    if (TargetNetworkInterfaceInternal == NULL) {
+      // This case should be handled before.
+      ASSERT (TargetNetworkInterfaceInternal != NULL);
+      return EFI_UNSUPPORTED;
+    }
+
+    NumNetworkInterfaces = 1;
   } else {
     TargetNetworkInterfaceInternal = (EFI_REDFISH_DISCOVER_NETWORK_INTERFACE_INTERNAL *)GetFirstNode (&mEfiRedfishDiscoverNetworkInterface);
     NumNetworkInterfaces           = NumberOfNetworkInterface ();
